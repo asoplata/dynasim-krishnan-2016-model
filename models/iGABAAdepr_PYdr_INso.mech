@@ -1,0 +1,104 @@
+% # iGABAAdepr_PYdr_INso: Normalized synaptic GABA-Aergic inhibitory
+%     current, with synaptic depression, FROM the interneuron axo-soma TO
+%     pyramidal dendrite PYdr<-INso connection used in the DynaSim
+%     implementation of (Krishnan et al., 2016). Note that in the original
+%     code, the class for this current is called GABA_A_D2, INso compartments
+%     are called CX, IN, or CX_SOMA, and PYdr compartments are called CX or
+%     CX_DEND. Also note that, instead of using a Heaviside increase in
+%     transmitter concentration upon spike detection, we used the (1 +
+%     tanh(V/4)) formulation from (Ermentrout & Kopell, 1998) for our spike
+%     detector and transmitter concentration model.
+%
+% - Note: Despite the paper, and its parents papers, specifying depression only
+%     for "intracortical excitatory connections", in the original code,
+%     synaptic depression does appear to be implemented and turned on for
+%     GABA_A_D2, thus we include it. Relatedly, in the parent codebase of
+%     (Bazhenov et al., 2002), synaptic depression is implemented but de facto
+%     turned off by initializing `Use` to 0 in file "neur271.c" line 1104.
+%
+% - Source: This was built from the original paper's code, using "currents.h"
+%     lines 219, 901-942, 1258, 1280-1281, "currents.cpp" lines 707-774,
+%     and "network.cfg" line 38.
+%
+% - Dependencies:
+%     - netconNearestNeighbors.m
+%
+% - References:
+%     - Bazhenov M, Timofeev I, Steriade M, Sejnowski TJ. Model of
+%         thalamocortical slow-wave sleep oscillations and transitions to
+%         activated states. The Journal of Neuroscience. 2002;22: 8691–8704.
+%     - Ermentrout GB, Kopell N. Fine structure of neural spiking and
+%         synchronization in the presence of conduction delays. Proceedings of
+%         the National Academy of Sciences. 1998;95: 1259–1264.
+%     - Krishnan GP, Chauvette S, Shamie I, Soltani S, Timofeev I, Cash SS, et
+%         al. Cellular and neurochemical basis of sleep stages in the
+%         thalamocortical network. eLife. 2016;5: e18607
+%
+% - Tags: synapse, connection, inhibition, gabaa
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Parameters
+%
+% For the INso to PYdr connection, the conductance is given by the original
+%     paper "absolutely" as 0.024 uS. We first need to normalize this value
+%     over the area of the target cell and convert the conductance to mS/cm^2.
+%     We do this by converting uS to mS and dividing by the area of the target
+%     PYdr compartments:
+%
+%    0.024 uS * (1 mS / 1000 uS) * (1 / (165e-6 cm^2)) = 0.15 mS/cm^2
+%
+gGABAA = 0.15  % mS/cm^2
+
+EGABAA = -70   % mV
+
+sGABAAIC = 0.1
+sGABAANoiseIC = 0.1
+deprGABAAIC = 0.9
+deprGABAANoiseIC = 0.1
+
+% Note that alpha rate here corresponds to the inverse of the rise  time constant, 1/tauR, and
+%        the beta rate here corresponds to the inverse of the decay time constant, 1/tauD
+alpha = 0.53 % ms^-1
+beta  = 0.18 % ms^-1
+
+% In the original code, this sleep stage experimental factor is represented by
+%     `fac_GABA_D2`
+fac_GABAAdepr_PYdr_INso = 0.22
+
+% Synaptic depression parameters:
+% The proportion of total "resources" used in each action potential
+% In the original code, this is `Use`
+resUse = 0.07  % unitless
+% In the original code, this is `Tr`
+tauRecov = 700 % in ms
+
+% Connective radius, aka how many target cells each source cell connects to,
+%     from the source's perspective.
+radius = 5
+
+% We also need to normalize the conductance in mS/cm^2 by the number of
+%     connections each target cell is receiving on average, so that the TOTAL sum
+%     of their conductive inputs adds to our overall maximal conductance above.
+normalizingFactor = min(((2*radius + 1) / (N_post/N_pre)), N_pre)
+
+
+% Functions
+% Note that what is passed is 2x the radius
+netcon = netconNearestNeighbors(2*radius, N_pre, N_post)
+
+IGABAAdepr_PYdr_INso(X,s,depr) = -fac_GABAAdepr_PYdr_INso*gGABAA/normalizingFactor.*((depr.*s)*netcon).*(X-EGABAA)
+
+% This way we record the synaptic currents!
+monitor IGABAAdepr_PYdr_INso
+
+
+% ODEs and ICs
+s' = alpha.*(1 + tanh(X_pre./4)).*(1-s) - beta.*s
+s(0) = sGABAAIC+sGABAANoiseIC.*rand(1,N_pre)
+
+% This represents the amount of synaptic resources available
+depr' = ((t-tspike_pre)<=dt).*(((1 - (1 - depr.*(1-resUse)).*exp(-(t-tspike_pre)./tauRecov))-depr)./dt)
+depr(0) = deprGABAAIC+deprGABAANoiseIC*rand(1,N_pre)
+
+
+% Linker
+@current += IGABAAdepr_PYdr_INso(X_post,s,depr)

@@ -1,0 +1,12 @@
+% iAppliedCurrent(t): Tonic stimulus, representing applied current injected
+%     into cell
+%
+% Note: By default this is ZERO, you must explicitly change the value using
+%     'vary', '.parameters', etc. if you actually want to use this mechanism!
+appliedStim=0
+onset=0
+offset=inf
+
+IAppliedCurrent(t) = appliedStim*(t>onset & t<offset)
+
+@current += IAppliedCurrent(t)

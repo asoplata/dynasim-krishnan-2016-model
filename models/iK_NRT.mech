@@ -1,0 +1,48 @@
+% # iK_NRT: Fast potassium current, for generic thalamic reticular cells used
+%     in the DynaSim implementation of (Krishnan et al., 2016). Note that in
+%     the original code, this celltype is called RE, and this current is called
+%     INaK.
+%
+% - Source: This was built from the original paper's code, using "currents.h"
+%     lines 302-331, and "currents.cpp" lines 103-130.
+%
+% - References:
+%     - Krishnan GP, Chauvette S, Shamie I, Soltani S, Timofeev I, Cash SS, et
+%         al. Cellular and neurochemical basis of sleep stages in the
+%         thalamic reticular network. eLife. 2016;5: e18607
+%
+% - Tags: potassium, current, intrinsic, reticular, thalamus
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Parameters
+gK = 10      % mS/cm^2
+EK = -95     % mV
+% In the original code, vShift is called `VtrK` and is initially set as -50 in
+%     the currents.h INaK current constructor. Also note that, while voltage
+%     shifts are usually simply positive values added to the voltage in the
+%     alpha and beta rate equations, in the original code of this current, each
+%     alpha/beta usage of voltage is (v - VtrK) where Vtr is negative, which is
+%     what we do below.
+vShift = -50 % mV
+
+nKIC = 0.1
+nKNoiseIC = 0.1
+
+% Note: In the original code, the temperature adjustment factor `Phi` comes out
+%     to be 1, since the temperature is the same as the reference temperature
+%     (36 C). Therefore it is unnecessary to calculate.
+
+% Functions
+alphaN(X) = 0.032.*(15 - (X-vShift))./(exp((15 - (X-vShift))./5) - 1)
+betaN(X) = 0.5.*exp((10 - (X-vShift))./40)
+tauN(X) = 1./(alphaN(X) + betaN(X))
+Ninf(X) = alphaN(X)./(alphaN(X) + betaN(X))
+IK_NRT(X,nK) = -gK.*nK.^4.*(X-EK)
+
+monitor IK_NRT
+
+% ODEs and ICs
+nK' = (Ninf(X)-nK)./tauN(X)
+nK(0)=nKIC+nKNoiseIC.*rand(1,Npop)
+
+% Linker
+@current += IK_NRT(X,nK)

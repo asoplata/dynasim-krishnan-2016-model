@@ -1,0 +1,80 @@
+% # iGABAB_TC_NRT: Normalized synaptic GABA-Bergic inhibitory current FROM the
+%     nucleus reticular thalamic cell TO thalamocortical cell TC<-NRT
+%     connection used in the DynaSim implementation of (Krishnan et al., 2016).
+%     Note that in the original code, the class for this current is called
+%     GABA_B, and NRT cells are called RE cells.
+%
+% - Source: This was built from the original paper's code, using "currents.h"
+%     lines 615-651, 1162, "currents.cpp" lines 316-343, "CellSyn.h" lines
+%     95-98, and "network.cfg" line 24.
+%
+% - Dependencies:
+%     - netconNearestNeighbors.m
+%
+% - References:
+%     - Destexhe A, Bal T, McCormick DA, Sejnowski TJ. Ionic mechanisms
+%         underlying synchronized oscillations and propagating waves in a model
+%         of ferret thalamic slices. Journal of Neurophysiology. 1996;76:
+%         2049–2070.
+%     - Krishnan GP, Chauvette S, Shamie I, Soltani S, Timofeev I, Cash SS, et
+%         al. Cellular and neurochemical basis of sleep stages in the
+%         thalamocortical network. eLife. 2016;5: e18607
+%
+% - Tags: synapse, connection, inhibition, gabab
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Parameters
+%
+% For the NRT (RE) to TC connection, the conductance is given by the original
+%     paper "absolutely" as 0.02 uS. However, in the original code, the value
+%     is given in unknown units as 0.000002, but we will begin by using the
+%     paper value. We first need to normalize this value over the area of the
+%     target cell and convert the conductance to mS/cm^2. We do this by
+%     converting uS to mS and dividing by the area of the target TC neurons:
+%
+%    0.02 uS * (1 mS / 1000 uS) * (1 / 2.9e-4 cm^2)) = 0.07 mS/cm^2
+%
+gGABAB = 0.07  % mS/cm^2
+EGABAB = -95   % mV
+rGABABIC = 0.1
+rGABABNoiseIC = 0.1
+gGABABIC = 0.1
+gGABABNoiseIC = 0.1
+
+k1 = 0.5      % mM^{-1} ms^{-1}
+k2 = 0.0012   % ms^{-1}
+k3 = 0.1    % ms^{-1}
+k4 = 0.034    % ms^{-1}
+
+% In the original code, this sleep stage experimental factor is represented by
+%     `fac_GABA_TC`
+fac_GABAB_TC_NRT = 0.55
+
+% Connective radius, aka how many target cells each source cell connects to,
+%     from the source's perspective.
+radius = 8
+
+% We also need to normalize the conductance in mS/cm^2 by the number of
+%     connections each target cell is receiving on average, so that the TOTAL sum
+%     of their conductive inputs adds to our overall maximal conductance above.
+normalizingFactor = min(((2*radius + 1) / (N_post/N_pre)), N_pre)
+
+
+% Functions
+% Note that what is passed is 2x the radius
+netcon = netconNearestNeighbors(2*radius, N_pre, N_post)
+
+IGABAB_TC_NRT(X,g) = -fac_GABAB_TC_NRT*gGABAB/normalizingFactor.*((g.^4./(g.^4 + 100))*netcon).*(X-EGABAB)
+
+% This way we record the synaptic currents!
+monitor IGABAB_TC_NRT
+
+
+% ODEs and ICs
+r' = k1.*(1 + tanh(X_pre./4)).*(1-r) - k2.*r
+r(0) = rGABABIC+rGABABNoiseIC.*rand(1,N_pre)
+g' = k3.*r - k4.*g
+g(0) = gGABABIC+gGABABNoiseIC.*rand(1,N_pre)
+
+
+% Linker
+@current += IGABAB_TC_NRT(X_post,g)

@@ -1,0 +1,57 @@
+% # iKCa_PYdr: Slow calcium-dependent potassium current, for generic
+%     pyramidal dendrite compartments used in the DynaSim implementation of
+%     (Krishnan et al., 2016). In the original code, this compartment/cell type
+%     is called CX or CX_DEND, and this current is called IKCa_CX.
+%
+% - Note: In original code, IKCa consumes y[1] which is `Cai0` for the
+%     celltype, and y[1] is also used as the primary state variable `cai` for
+%     the confusingly-named Ca buffer ICa, therefore IKCa is using the cai of
+%     ICa.
+%
+% - Note: In original code, an experiment factor `fac_gkca_cx` is declared but
+%     never used, so we're leaving it out.
+%
+% - Source: This was built from the original paper's code, using "currents.h"
+%     lines 439-444, 1207 and "currents.cpp" lines 225-237.
+%
+% - References:
+%     - Krishnan GP, Chauvette S, Shamie I, Soltani S, Timofeev I, Cash SS, et
+%         al. Cellular and neurochemical basis of sleep stages in the
+%         thalamocortical network. eLife. 2016;5: e18607
+%
+% - Requires: @CaBuffer_PYdr calcium concentration exposed by
+%     "CaBuffer_PYdr" mechanism
+%
+% - Tags: calcium, potassium, current, intrinsic, pyramidal, dendrite
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Parameters
+gKCa = 0.05 % mS/cm^2
+EKCa = -90  % mV
+% The Q10 temperature adjustment values never change over the course of the
+%     simulations, so we are setting them to be constant.
+% This is called "Tad" in original code, unlike Q's of "IHVA_PYdr".
+phiM = 2.3^((36-23)/10)
+
+mKCaIC = 0.1
+mKCaNoiseIC = 0.1
+
+% In the original code, this sleep stage experimental factor is represented by
+%     `fac_gkca_cx`, but it is never used!
+fac_KCa_PYdr = 1  % unitless
+
+% Functions
+% In original code, there is a note that the Cai exponent is 1
+alphaM(CaBuffer_PYdr) = 0.01.*CaBuffer_PYdr
+betaM = 0.02
+tauM(CaBuffer_PYdr) = (1./(alphaM(@CaBuffer_PYdr) + betaM))./phiM
+Minf(CaBuffer_PYdr) = alphaM(@CaBuffer_PYdr)./(alphaM(@CaBuffer_PYdr) + betaM)
+IKCa_PYdr(X,mKCa) = -phiM.*fac_KCa_PYdr.*gKCa.*mKCa.*(X-EKCa)
+
+monitor IKCa_PYdr
+
+% ODEs and ICs
+mKCa' = (Minf(@CaBuffer_PYdr) - mKCa)./tauM(@CaBuffer_PYdr)
+mKCa(0)=mKCaIC+mKCaNoiseIC.*rand(1,Npop)
+
+% Interface
+@current += IKCa_PYdr(X,mKCa)

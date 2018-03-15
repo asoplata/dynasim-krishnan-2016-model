@@ -1,0 +1,54 @@
+% # iNaP_PYso: Persistent sodium current, Hodgkin-Huxley-style, for
+%     generic pyramidal soma compartments used in the DynaSim implementation of
+%     (Krishnan et al., 2016). Note that in the original code, this
+%     compartment/cell type is called CX or CX_SOMA, and this current is called
+%     INap_CX.
+%
+% - Source: This was built from the original paper's code, using "currents.h"
+%     lines 533-546, 1205 and "currents.cpp" lines 306-314.
+%
+% - References:
+%     - Krishnan GP, Chauvette S, Shamie I, Soltani S, Timofeev I, Cash SS, et
+%         al. Cellular and neurochemical basis of sleep stages in the
+%         thalamocortical network. eLife. 2016;5: e18607
+%
+% - Tags: sodium, current, intrinsic, pyramidal, soma
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Parameters
+gNaP = 15  % mS/cm^2
+ENaP = 50  % mV
+% The Q10 temperature adjustment values never change over the course of the
+%     simulations, so we are setting them to be constant.
+% Note that this uses a reference temperature of 22 unlike 23/24 in most of the
+%     other currents.
+phiM = 2.7^((36-22)/10)   % unitless Q10 value of temperature adjustment
+
+mNaPIC = 0.01
+mNaPNoiseIC = 0.1
+
+% Functions
+tauM = 0.8/phiM
+Minf(X) = 0.02./(1 + exp(-(X - -42)./5))
+
+% Instead of the PYso axo-somatic compartment calculating the dv/dt the normal
+%     way, they solve for just v using the "steady-state" values of the system.
+%     This means that we have to calculate different parts of the current/etc.
+%     differently:
+% Note that the below doesn't contain the voltage of the soma. This is
+%     analogous to the corresponding part of `g2_SOMA` in the original code:
+curr_NaP_PYso(X,mNaP) = gNaP.*mNaP.*ENaP
+
+% Note that the below doesn't contain any voltages. This is
+%     analogous to the corresponding part of `g1_SOMA` in the original code:
+cond_NaP_PYso(X,mNaP) = gNaP.*mNaP
+
+monitor curr_NaP_PYso
+monitor cond_NaP_PYso
+
+% ODEs and ICs
+mNaP' = (Minf(X)-mNaP)./tauM
+mNaP(0)=mNaPIC+mNaPNoiseIC.*rand(1,Npop)
+
+% Interface
+@current += curr_NaP_PYso(X,mNaP)
+@conductance += cond_NaP_PYso(X,mNaP)

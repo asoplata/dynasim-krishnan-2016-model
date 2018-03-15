@@ -1,0 +1,69 @@
+% # iT_TC: T-type Low-threshold Calcium current, Hodgkin-Huxley-style,
+%     for generic thalamocortical compartments, corresponding to CaV 3.1, used
+%     in the DynaSim implementation of (Krishnan et al., 2016). Note that in
+%     the original code, this current is called IT_TC, and in the original
+%     paper it is called iLCa. Additionally, the ICa identifier in the original
+%     code refers to the calcium buffer concentration dynamics, NOT the calcium
+%     current.
+%
+% - Note: In the original code, this current uses two state variables "m" and
+%     "h", but this is different from the original T-current implementation in
+%     (Destexhe et al., 1996) which uses the "m_inf" in place of integrating an
+%     "m" differential equation.
+%
+% - Source: This was built from the original paper's code, using "currents.h"
+%     lines 346-361,"currents.cpp" lines 143-162, and "CellSyn.h" line 60.
+%
+% - References:
+%     - Krishnan GP, Chauvette S, Shamie I, Soltani S, Timofeev I, Cash SS, et
+%         al. Cellular and neurochemical basis of sleep stages in the
+%         thalamocortical network. eLife. 2016;5: e18607
+%     - Destexhe A, Bal T, McCormick DA, Sejnowski TJ. Ionic mechanisms
+%         underlying synchronized oscillations and propagating waves in a model
+%         of ferret thalamic slices. Journal of Neurophysiology. 1996;76:
+%         2049–2070.
+%
+% - Requires: @CaBuffer_TC calcium concentration exposed by
+%     "CaBuffer_TC" mechanism
+%
+% - Exposes: @IT_TC calcium current as required by "CaBuffer_TC"
+%
+% - Tags: calcium, current, intrinsic, thalamocortical
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Parameters
+gT = 2.5    % mS/cm^2
+vShift = 2  % mV
+% The Q10 temperature adjustment values never change over the course of the
+%     simulations, so we are setting them to be constant.
+phiM = 3.55^((36-24)/10)   % unitless Q10 value of temperature adjustment
+phiH = 3.0^((36-24)/10)    % unitless Q10 value of temperature adjustment
+
+mTIC = 0.01
+mTNoiseIC = 0.1
+hTIC = 0.35
+hTNoiseIC = 0.1
+
+% Functions
+ET(CaBuffer_TC) = 1000.*8.31441.*(273.15+36)./(2.*96846).*log(2./CaBuffer_TC) % mV
+Minf(X)  = 1./(1+exp((-(X+vShift+57))./6.2))
+Hinf(X)  = 1./(1+exp((X+vShift+81)./4))
+tauM(X)  = (1./(exp(-(X+131.6)./16.7)+exp((X+16.8)./18.2)) + 0.612)./phiM
+tauH(X)  = (30.8+(211.4+exp((X+vShift+113.2)./5))./(1+exp((X+vShift+84)./3.2)))./phiH
+% Note: For why the current term was not made negative, see below.
+IT_TC(X,mT,hT,CaBuffer_TC) = gT.*mT.^2.*hT.*(X-ET(@CaBuffer_TC))
+
+monitor IT_TC
+
+% ODEs and ICs
+mT' = (Minf(X)-mT)./tauM(X)
+mT(0)=mTIC+mTNoiseIC.*rand(1,Npop)
+hT' = (Hinf(X)-hT)./tauH(X)
+hT(0)=hTIC+hTNoiseIC.*rand(1,Npop)
+
+% Interface
+% Note: Usually in DynaSim, the current is made negative before being assigned
+%     to a linker, but in this case, the below is less confusing since exposing
+%     IT_TC for the CaBuffer_TC mechanism requires a
+%     not-made-negative version of IT_TC.
+@current += -IT_TC(X,mT,hT,CaBuffer_TC)
+@IT_TC += IT_TC(X,mT,hT,CaBuffer_TC)

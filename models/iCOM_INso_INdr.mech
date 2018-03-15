@@ -1,0 +1,27 @@
+% # iCOM_INso_INdr: Simple ohmic axial current for connecting FROM one IN cell
+%     dendrite TO the corresponding IN cell axo-soma INso<-INdr used in the
+%     DynaSim implementation of (Krishnan et al., 2016). Note that in the
+%     original code, this cell type is called CX and sometimes IN, while the
+%     compartments are called CX_DEND or CX_SOMA.
+%
+% - Source: This was built from a combination of the original paper and its
+%     code, using "currents.h" lines 219, 265, 1249-1285, "currents.cpp" lines
+%     1080-1097, and "CellSyn.h" line 165.
+%
+% - References:
+%     - Krishnan GP, Chauvette S, Shamie I, Soltani S, Timofeev I, Cash SS, et
+%         al. Cellular and neurochemical basis of sleep stages in the
+%         thalamocortical network. eLife. 2016;5: e18607
+%
+% - Tags: current, interneuron, dendrite, soma
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Linkers
+% Note that, due to the "reduced form" used in the PYso's master equations, it
+%     is significantly easier to understand how the system is calculated by
+%     doing all of the conversions in the master equation rather than
+%     separately in nonstandard methods in the mechanism files. In other words,
+%     trust me that this setup, including this handling of the dendritic
+%     voltage, is the easiest to understand.
+voltageFunction(IN) = IN
+
+@voltage += voltageFunction(IN)

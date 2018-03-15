@@ -1,0 +1,42 @@
+% # iNaP_PYdr: Persistent sodium current, Hodgkin-Huxley-style, for
+%     generic pyramidal dendrite compartments used in the DynaSim
+%     implementation of (Krishnan et al., 2016). Note that in the original
+%     code, this compartment/cell type is called CX or CX_DEND, and this
+%     current is called INap_CX.
+%
+% - Source: This was built from the original paper's code, using "currents.h"
+%     lines 533-546, 1205 and "currents.cpp" lines 306-314.
+%
+% - References:
+%     - Krishnan GP, Chauvette S, Shamie I, Soltani S, Timofeev I, Cash SS, et
+%         al. Cellular and neurochemical basis of sleep stages in the
+%         thalamocortical network. eLife. 2016;5: e18607
+%
+% - Tags: sodium, current, intrinsic, pyramidal, dendrite
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Parameters
+gNaP = 2.1 % mS/cm^2
+ENaP = 50  % mV
+% The Q10 temperature adjustment values never change over the course of the
+%     simulations, so we are setting them to be constant.
+% Note that this uses a reference temperature of 22 unlike 23 in most of the
+%     other currents.
+phiM = 2.7^((36-22)/10)
+tauM = 0.8/phiM
+
+mNaPIC = 0.1
+mNaPNoiseIC = 0.1
+
+% Functions
+Minf(X) = 0.02./(1 + exp(-(X + 42)./5))
+
+INaP_PYdr(X,mNaP) = -gNaP.*mNaP.*(X-ENaP)
+
+monitor INaP_PYdr
+
+% ODEs and ICs
+mNaP' = (Minf(X)-mNaP)./tauM
+mNaP(0)=mNaPIC+mNaPNoiseIC*rand(1,Npop)
+
+% Interface
+@current += INaP_PYdr(X,mNaP)

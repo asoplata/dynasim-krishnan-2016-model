@@ -1,0 +1,75 @@
+% # iNa_PYdr: Fast sodium current for generic pyramidal dendrite
+%     compartments used in the DynaSim implementation of (Krishnan et al.,
+%     2016). Note that in the original code, this compartment/cell type is
+%     called CX or CX_DEND, and this current is called INa_CX.
+%
+% - Source: This was built from the original paper's code, using "currents.h"
+%     lines 504-526, 1202 and "currents.cpp" lines 275-302. The `trap0`
+%     threshold detection was also built from code from the cited source paper,
+%     (Mainen & Sejnowski, 1996), file "cells/na.mod" lines 24-25 and 185-191,
+%     NOT (Krishnan, et al., 2016).
+%
+% - Dependencies:
+%     - iNaThresholdDetector.m
+%
+% - References:
+%     - Krishnan GP, Chauvette S, Shamie I, Soltani S, Timofeev I, Cash SS, et
+%         al. Cellular and neurochemical basis of sleep stages in the
+%         thalamocortical network. eLife. 2016;5: e18607
+%     - Mainen ZF, Sejnowski TJ. Influence of dendritic structure on firing
+%         pattern in model neocortical neurons. Nature. 1996;382: 363–366.
+%         doi:10.1038/382363a0
+%
+% - Tags: sodium, current, intrinsic, pyramidal, dendrite
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Parameters
+gNa = 0.8 % mS/cm^2
+ENa = 50  % mV
+% The Q10 temperature adjustment values never change over the course of the
+%     simulations, so we are setting them to be constant.
+phiM = 2.3^((36-23)/10)   % unitless Q10 value of temperature adjustment
+phiH = 2.3^((36-23)/10)   % unitless Q10 value of temperature adjustment
+
+mNaIC = 0.01
+mNaNoiseIC = 0.1
+hNaIC = 0.01
+hNaNoiseIC = 0.1
+
+threshM = -35
+rateConstantMAlpha = 0.182
+rateConstantMBeta = 0.124
+expDenomM = 9
+
+threshHAlpha = -50
+threshHBeta = -75
+rateConstantHAlpha = 0.024
+rateConstantHBeta = 0.0091
+expDenomH = 5
+
+% Functions
+vShifted(X) = X - 10
+
+% This is implenting the `trap0` function in the original code
+alphaM(X) = iNaThresholdDetector( vShifted(X),  threshM, rateConstantMAlpha, expDenomM)
+betaM(X) =  iNaThresholdDetector(-vShifted(X), -threshM, rateConstantMBeta,  expDenomM)
+
+alphaH(X) = iNaThresholdDetector( vShifted(X), threshHAlpha, rateConstantHAlpha, expDenomH)
+betaH(X) =  iNaThresholdDetector(-vShifted(X), -threshHBeta, rateConstantHBeta,  expDenomH)
+
+tauM(X) = (1./(alphaM(X) + betaM(X)))./phiM
+Minf(X) = alphaM(X)./(alphaM(X) + betaM(X))
+tauH(X) = (1./(alphaH(X) + betaH(X)))./phiH
+Hinf(X) = 1./(1 + exp((vShifted(X) + 65)./6.2))
+
+INa_PYdr(X,mNa,hNa) = -phiM*gNa.*mNa.^3.*hNa.*(X-ENa)
+
+monitor INa_PYdr
+
+% ODEs and ICs
+mNa' = (Minf(X)-mNa)./tauM(X)
+mNa(0)=mNaIC+mNaNoiseIC.*rand(1,Npop)
+hNa' = (Hinf(X)-hNa)./tauH(X)
+hNa(0)=hNaIC+hNaNoiseIC.*rand(1,Npop)
+
+% Interface
+@current += INa_PYdr(X, mNa, hNa)

@@ -1,0 +1,64 @@
+% # iNa_TC: Fast sodium current for generic thalamocortical cells used in the
+%     DynaSim implementation of (Krishnan et al., 2016). Note that in the
+%     original code, this current is called INaK.
+%
+% - Source: This was built from the original paper's code, using "currents.h"
+%     lines 302-331, 1160, "currents.cpp" lines 103-130, and "CellSyn.h" line
+%     65.
+%
+% - References:
+%     - Krishnan GP, Chauvette S, Shamie I, Soltani S, Timofeev I, Cash SS, et
+%         al. Cellular and neurochemical basis of sleep stages in the
+%         thalamocortical network. eLife. 2016;5: e18607
+%     - Destexhe A, Bal T, McCormick DA, Sejnowski TJ. Ionic mechanisms
+%         underlying synchronized oscillations and propagating waves in a model
+%         of ferret thalamic slices. Journal of Neurophysiology. 1996;76:
+%         2049–2070.
+%
+% - Tags: sodium, current, intrinsic, thalamus, thalamocortical
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Parameters
+gNa = 90     % mS/cm^2
+ENa = 50     % mV
+
+% In the original code, vShift is called `Vtr` and is initially set as -50 in
+%     the currents.h INaK current constructor, but later changed to -40 in the
+%     CellSyn.h TCcore constructor. Also note that, while voltage shifts are
+%     usually simply positive values added to the voltage in the alpha and beta
+%     rate equations, in the original code of this current, each alpha/beta
+%     usage of voltage is (v - Vtr) where Vtr is negative, which is what we do
+%     below.
+vShift = -40 % mV
+
+mNaIC = 0.01
+mNaNoiseIC = 0.1
+hNaIC = 0.01
+hNaNoiseIC = 0.1
+
+% Note: In the original code, the temperature adjustment factor `Phi` comes out
+%     to be 1, since the temperature is the same as the reference temperature
+%     (36 C). Therefore it is unnecessary to calculate.
+
+% Functions
+alphaM(X) = 0.32.*(13 - (X-vShift))./(exp((13 - (X-vShift))./4) - 1)
+betaM(X) =  0.28.*((X-vShift) - 40)./(exp(((X-vShift) - 40)./5) - 1)
+tauM(X) = 1./(alphaM(X) + betaM(X))
+Minf(X) = alphaM(X)./(alphaM(X) + betaM(X))
+
+alphaH(X) = 0.128.*exp((17 - (X-vShift))./18)
+betaH(X) =  4./(exp((40 - (X-vShift))./5) + 1)
+tauH(X) = 1./(alphaH(X) + betaH(X))
+Hinf(X) = alphaH(X)./(alphaH(X) + betaH(X))
+
+INa_TC(X,mNa,hNa) = -gNa.*mNa.^3.*hNa.*(X-ENa)
+
+monitor INa_TC
+
+% ODEs and ICs
+mNa' = (Minf(X)-mNa)./tauM(X)
+mNa(0)=mNaIC+mNaNoiseIC.*rand(1,Npop)
+hNa' = (Hinf(X)-hNa)./tauH(X)
+hNa(0)=hNaIC+hNaNoiseIC.*rand(1,Npop)
+
+% Linker
+@current += INa_TC(X,mNa,hNa)

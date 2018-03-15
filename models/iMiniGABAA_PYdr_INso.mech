@@ -1,0 +1,111 @@
+% # iMiniGABAA_PYdr_INso: Normalized synaptic randomized "mini" GABA-Aergic
+%     inhibitory current FROM the interneuron axo-soma compartment TO pyramidal
+%     dendrite PYdr<-INso connection used in the DynaSim implementation of
+%     (Krishnan et al., 2016). Note that in the original code, the class for
+%     this current is called GABA_A_D2, INso are called CX, CX_SOMA, IN, or
+%     FS1, and PYdr are called CX or CX_DEND. Also note that, instead of using
+%     a Heaviside increase in transmitter concentration upon spike detection,
+%     we used the (1 + tanh(V/4)) formulation from (Ermentrout & Kopell, 1998)
+%     for our spike detector and transmitter concentration model.
+%
+% - Source: This was built from the original paper's code, using "currents.h"
+%     lines 901-942, 1258, 1280-1281, "currents.cpp" lines 707-774, and
+%     "network.cfg" line 38.
+%
+% - Dependencies:
+%     - netconNearestNeighbors.m
+%     - newReleaseUpdate.m
+%
+% - References:
+%     - Ermentrout GB, Kopell N. Fine structure of neural spiking and
+%         synchronization in the presence of conduction delays. Proceedings of
+%         the National Academy of Sciences. 1998;95: 1259–1264.
+%     - Krishnan GP, Chauvette S, Shamie I, Soltani S, Timofeev I, Cash SS, et
+%         al. Cellular and neurochemical basis of sleep stages in the
+%         thalamocortical network. eLife. 2016;5: e18607
+%
+% - Tags: synapse, connection, inhibition, gabaa
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Parameters
+%
+% For the INso to PYdr connection, the conductance is given by the original
+%     paper "absolutely" as 0.02 uS. We first need to normalize this value over
+%     the area of the target cell and convert the conductance to mS/cm^2. We do
+%     this by converting uS to mS and dividing by the area of the target PYdr
+%     cells:
+%
+%    0.02 uS * (1 mS / 1000 uS) * (1 / (165e-6 cm^2)) = 0.12 mS/cm^2
+%
+gMiniGABAA = 0.12 % mS/cm^2
+EGABAA = -70        % mV
+neMiniIC = 75
+neMiniNoiseIC = 20
+laMiniIC = 0
+laMiniNoiseIC = 0
+
+miniFreq = 20 % in Hz
+% This is used both for comparing floats the correct way in
+%     `IMiniGABAA_PYdr_INso_read`, and as a minimum in the
+%     `newReleaseUpdate` function.
+epsilon = 0.000001
+
+% In the original code, this sleep stage experimental factor is represented by
+%     `fac_GABA_D2`
+fac_MiniGABAA_PYdr_INso = 0.22
+
+% Connective radius, aka how many target cells each source cell connects to,
+%     from the source's perspective.
+radius = 5
+
+% Functions
+% We also need to normalize the conductance in mS/cm^2 by the number of
+%     connections each target cell is receiving on average, so that the TOTAL
+%     sum of their conductive inputs adds to our overall maximal conductance
+%     above.
+normalizingFactor = min(((2*radius + 1) / (N_post/N_pre)), N_pre)
+
+% Remove autapses to the dendrite corresponding to this soma
+removeRecurrentBool = 1
+% Note that what is passed is 2x the radius. Also note that
+%     `netconNearestNeighbors` is an external function located in
+%     `netconNearestNeighbors.m`
+netcon = netconNearestNeighbors(2*radius, N_pre, N_post)
+
+% This checks for if there has been enough time since the last spike AND the
+%     last mini, similar to, in the original code, "currents.cpp" line 514.
+checkTime(t,lastRelease,newRelease) = ((t-tspike_pre)>100).*((t-lastRelease)>newRelease)
+
+% Unfortunately, due to the way DynaSim works, the "lastRelease" state variable
+%     is updated AFTER the current function "IMiniGABAA_PYdr_INso" is used
+%     in the dv/dt of the target cell, but BEFORE the monitors are calculated.
+%     And because lastRelease is not a "true" state variable in the biophysical
+%     sense, but instead a "hack" for us to track the last mini time, we have
+%     to use DIFFERENT time checks (therefore two different functions) for how
+%     the minis affect the simulation, vs how we actually read out the minis'
+%     contribution themselves. Hence, for data visualization purposes, we only
+%     need to monitor "IMiniGABAA_PYdr_INso_read".
+% In other words, this is the function actually used in the simulation:
+IMiniGABAA_PYdr_INso(X,t,lastRelease,newRelease) = -(checkTime(t,lastRelease,newRelease).*fac_MiniGABAA_PYdr_INso.*gMiniGABAA/normalizingFactor)*netcon.*(X-EGABAA)
+
+% And this is the function that communicates the output for our analysis:
+read_IMiniGABAA_PYdr_INso(X,t,lastRelease) = -((abs(t-lastRelease)<epsilon).*fac_MiniGABAA_PYdr_INso.*gMiniGABAA/normalizingFactor)*netcon.*(X-EGABAA)
+
+monitor read_IMiniGABAA_PYdr_INso
+
+% ODEs and ICs
+% The "state" of the newRelease state variable is a random minimum AMOUNT of
+%     time until the next mini can happen for that synapse. (This is where the
+%     magic happens)
+% Note that `checkTime` is an internal function defined above, but
+%     `newReleaseUpdate` is an external function defined in
+%     `newReleaseUpdate.m`.
+newRelease' = checkTime(t,lastRelease,newRelease).*((newReleaseUpdate((t-tspike_pre),miniFreq,epsilon,N_pre) - newRelease)./dt)
+newRelease(0) = neMiniIC+neMiniNoiseIC.*rand(1,N_pre)
+
+% The "state" of the lastRelease state variable is the ACTUAL time of the
+% previous mini
+lastRelease' = checkTime(t,lastRelease,newRelease).*((t - lastRelease)./dt)
+lastRelease(0) = laMiniIC+laMiniNoiseIC.*rand(1,N_pre)
+
+% Linker
+@current += IMiniGABAA_PYdr_INso(X,t,lastRelease,newRelease)
