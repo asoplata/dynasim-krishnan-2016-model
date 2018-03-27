@@ -7,9 +7,11 @@ function specification = assembleSpecification(dt, numCellsScaledown)
 %
 % Inputs:
 %   'dt': time resolution of the simulation, in ms
-%   'numCellsScaledown': number to divide each cell population size by, if one
-%                        wishes to run a smaller model, since the default model
-%                        is rather large.
+%   'numCellsScaledown': number to multiply each cell population size
+%                        by, between 0 and 1. To run the full model, use 
+%                        1. If one wishes to run a smaller model, since 
+%                        the default model is rather large, use a 
+%                        smaller proportion like 0.2.
 %
 % Outputs:
 %   'specification': DynaSim specification structure for the (Krishnan
@@ -70,7 +72,7 @@ specification=[];
 % -------------------------------------------------------------------
 % PY cells and intercompartmental PY connections:
 specification.populations(1).name='PYdr';
-specification.populations(1).size=round(500/numCellsScaledown);
+specification.populations(1).size=round(numCellsScaledown*500);
 specification.populations(1).equations=eqns;
 specification.populations(1).mechanism_list={...
     'iAppliedCurrent',...
@@ -84,7 +86,7 @@ specification.populations(1).mechanism_list={...
 
 % Note that the soma mechanisms are somewhat sensitive to initial conditions
 specification.populations(2).name='PYso';
-specification.populations(2).size=round(500/numCellsScaledown);
+specification.populations(2).size=round(numCellsScaledown*500);
 specification.populations(2).equations=eqns_soma;
 specification.populations(2).mechanism_list={...
     'iNa_PYso',...
@@ -103,7 +105,7 @@ specification.connections(2).mechanism_list={...
 
 % IN cells and intercompartmental IN connections:
 specification.populations(3).name='INdr';
-specification.populations(3).size=round(100/numCellsScaledown);
+specification.populations(3).size=round(numCellsScaledown*100);
 specification.populations(3).equations=eqns;
 specification.populations(3).mechanism_list={...
     'iAppliedCurrent',...
@@ -116,7 +118,7 @@ specification.populations(3).mechanism_list={...
 
 % Note that the soma mechanisms are somewhat sensitive to initial conditions
 specification.populations(4).name='INso';
-specification.populations(4).size=round(100/numCellsScaledown);
+specification.populations(4).size=round(numCellsScaledown*100);
 specification.populations(4).equations=eqns_soma;
 specification.populations(4).mechanism_list={...
     'iNa_INso',...
@@ -144,7 +146,7 @@ specification.connections(6).mechanism_list={...
 %% 3. Assemble Thalamic Model and Intrathalamic Connections
 % -------------------------------------------------------------------
 specification.populations(5).name='TC';
-specification.populations(5).size=round(100/numCellsScaledown);
+specification.populations(5).size=round(numCellsScaledown*100);
 specification.populations(5).equations=eqns;
 specification.populations(5).mechanism_list={...
     'iAppliedCurrent',...
@@ -155,7 +157,7 @@ specification.populations(5).mechanism_list={...
     'CaBuffer_TC','iT_TC','iH_TC'};
 
 specification.populations(6).name='NRT';
-specification.populations(6).size=round(100/numCellsScaledown);
+specification.populations(6).size=round(numCellsScaledown*100);
 specification.populations(6).equations=eqns;
 specification.populations(6).mechanism_list={...
     'iAppliedCurrent',...

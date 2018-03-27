@@ -19,7 +19,7 @@ giving you a good skeleton to start experimenting yourself.
      'dot' com
 
 - Notes:
-  - The default model is rather large, so you may wish to increase the
+  - The default model is rather large, so you may wish to decrease the
     `numCellScaledownFactor` variable to decrease the size of your model.
   - Due to the complexity of the synaptic mechanisms, this REQUIRES that you
     only use EULER integration for solving the ODE system. In the future, other
@@ -60,11 +60,12 @@ dt = 0.01; % in milliseconds
 
 % For the full size model (500 PYso's and PYdr's, 100 INso's and INdr's, 100
 %   TC's, and 100 NRT's), use a `numCellsScaledownFactor` of 1. To lower the
-%   number of cells simulated, but keep the same proportions, increase this
-%   number. As an example, using a numCellsScaledownFactor of 100 would
-%   decrease the population sizes to 5 PYso's and PYdr's, 1 INso and INdr, 1
-%   TC, and 1 NRT.
-numCellsScaledownFactor = 100;
+%   number of cells simulated, but keep the same proportions, decrease this
+%   number to something > 0. As an example, using a 
+%   numCellsScaledownFactor of 0.1 (aka using a size of 10%) would 
+%   decrease the population sizes to 5 PYso's and PYdr's, 1 INso and 
+%   INdr, 1 TC, and 1 NRT.
+numCellsScaledownFactor = 0.1;
 
 % "Vary" parameters, aka parameters to be varied -- this tells DynaSim to run a
 %   simulation for all combinations of values. For a tutorial on how to use
