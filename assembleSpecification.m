@@ -42,7 +42,9 @@ eqns={
   'Cm = 0.75' % uF/cm^2
   'thresh=-20'
   'monitor v.spikes(thresh, 1)'
-  'v(0)=-65+5*rand(1,Npop)'
+  'vIC = -60'    % mV
+  'vNoiseIC = 5' % mV
+  'v(0) = vIC+vNoiseIC*rand(1,Npop)'
 };
 
 % WARNING: Until indicated otherwise, only use the 'euler' integration when
@@ -57,9 +59,11 @@ eqns={
 eqns_soma = {
 strcat(['dv/dt=((@voltage + (kappa*S_SOMA.*(@current+6.74172)))./' ...
                '(1 + kappa*S_SOMA.*(@conductance)) - v(t-'],num2str(dt),'))./',num2str(dt))
-  'kappa=10e3'  % kOhms
-  'S_SOMA=1e-6' % cm^2
-  'v(0) = -60+5*rand(1,Npop)'
+  'kappa=10e3'   % kOhms
+  'S_SOMA=1e-6'  % cm^2
+  'vIC = -60'    % mV
+  'vNoiseIC = 5' % mV
+  'v(0) = vIC+vNoiseIC*rand(1,Npop)'
   'thresh=-20'
   'monitor v.spikes(thresh, 1)'
 };

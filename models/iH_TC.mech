@@ -68,11 +68,11 @@ monitor IH_TC
 % Here, we implement the ODEs according to the same state variables as the
 %     original code, i.e., O, P1, and OL.
 Open' = alphaH(X).*(1 - Open - OpenLocked) - betaH(X).*Open
-Open(0) = 0.01.*rand(1,Npop)
+Open(0) = OpenHIC+OpenHNoiseIC.*rand(1,Npop)
 Pone' = k2.*((@CaBuffer_TC./Cac).^nca).*(1-Pone) - k2.*Pone
-Pone(0) = 0.01.*rand(1,Npop)
+Pone(0) = PoneHIC+PoneHNoiseIC.*rand(1,Npop)
 OpenLocked' = k4.*(Pone./pc).^nexp.*Open - k4.*OpenLocked
-OpenLocked(0) = 0.0
+OpenLocked(0) = OpenLockedHIC+OpenLockedHNoiseIC.*rand(1,Npop)
 
 % Linker
 @current += IH_TC(X,Open,Pone,OpenLocked)

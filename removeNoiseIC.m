@@ -92,6 +92,12 @@ modifications  = {...
   'NRT',         'hTNoiseIC'           ,     0;
   'TC',          'mTNoiseIC'           ,     0;
   'TC',          'hTNoiseIC'           ,     0;
+  'INdr',        'vNoiseIC'            ,     0;
+  'INso',        'vNoiseIC'            ,     0;
+  'PYdr',        'vNoiseIC'            ,     0;
+  'PYso',        'vNoiseIC'            ,     0;
+  'TC',          'vNoiseIC'            ,     0;
+  'NRT',         'vNoiseIC'            ,     0;
 };
 
 % ------------------------------------------
