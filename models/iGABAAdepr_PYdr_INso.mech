@@ -82,8 +82,10 @@ normalizingFactor = min(((2*radius + 1) / (N_post/N_pre)), N_pre)
 
 
 % Functions
+% Keep connections to compartment with the same index
+removeRecurrentBool = 0
 % Note that what is passed is 2x the radius
-netcon = netconNearestNeighbors(2*radius, N_pre, N_post)
+netcon = netconNearestNeighbors(2*radius, N_pre, N_post, removeRecurrentBool)
 
 IGABAAdepr_PYdr_INso(X,s,depr) = -fac_GABAAdepr_PYdr_INso*gGABAA/normalizingFactor.*((depr.*s)*netcon).*(X-EGABAA)
 

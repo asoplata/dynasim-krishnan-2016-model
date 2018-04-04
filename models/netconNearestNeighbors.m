@@ -9,23 +9,17 @@ function netcon = netconNearestNeighbors(nNeighbors, nPre, nPost, removeRecurren
 %     for connections where the two populations are of either the same or
 %     different sizes.
 %
-% Usage: netcon = netconNearestNeighbors(nNeighbors, nPre, nPost)
-%        netcon = netconNearestNeighbors(nNeighbors, nPre, nPost, removeRecurrentBool)
+% Usage: netcon = netconNearestNeighbors(nNeighbors, nPre, nPost, removeRecurrentBool)
 %
 % Inputs:
 %   nNeighbors: number of nearest neighbors to connect to, aka connective "diameter"
 %   nPre:  number of PREsynaptic neurons
 %   nPost: number of POSTsynaptic neurons
-%   removeRecurrentBool: Remove recurrent connections. Optional, default
-%       false. Only meant for when making a connection between a population
-%       and itself.
+%   removeRecurrentBool: Remove recurrent connections. Only meant for when
+%       making a connection between a population and itself.
 %
 % Outputs:
 %   netcon: the connection matrix
-
-if ~exist('removeRecurrentBool', 'var')
-  removeRecurrentBool = false;
-end
 
 netcon = zeros(nPre, nPost);
 
@@ -80,6 +74,7 @@ end
 % remove recurrent connections
 % AES: changed default check to positive
 % Note: This WILL break if it is used on populations of different sizes
+% AES: removed the former `exist` check since `exist` breaks MEX code gen
 if removeRecurrentBool
   netcon = netcon - diag(diag(netcon));
 end

@@ -64,8 +64,10 @@ radius = 1
 %     above.
 normalizingFactor = min(((2*radius + 1) / (N_post/N_pre)), N_pre)
 
-% Note that what is passed is 2x the radius.
-netcon = netconNearestNeighbors(2*radius, N_pre, N_post)
+% Keep connections to compartment with the same index
+removeRecurrentBool = 0
+% Note that what is passed is 2x the radius
+netcon = netconNearestNeighbors(2*radius, N_pre, N_post, removeRecurrentBool)
 
 % This checks for if there has been enough time since the last spike AND the
 %     last mini, similar to, in the original code, "currents.cpp" line 514.

@@ -58,10 +58,10 @@ radius = 10
 %     of their conductive inputs adds to our overall maximal conductance above.
 normalizingFactor = min(((2*radius + 1) / (N_post/N_pre)), N_pre)
 
-% Note that what is passed is 2x the radius. Also note that
-%     `netconNearestNeighbors` is an external function located in
-%     `netconNearestNeighbors.m`
-netcon = netconNearestNeighbors(2*radius, N_pre, N_post)
+% Keep connections to compartment with the same index
+removeRecurrentBool = 0
+% Note that what is passed is 2x the radius
+netcon = netconNearestNeighbors(2*radius, N_pre, N_post, removeRecurrentBool)
 
 IAMPA_TC_PYso(X,s) = -fac_AMPA_TC_PYso*gAMPA/normalizingFactor.*(s*netcon).*(X-EAMPA)
 

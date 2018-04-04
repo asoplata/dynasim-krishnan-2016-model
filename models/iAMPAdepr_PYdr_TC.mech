@@ -68,8 +68,10 @@ radius = 10
 normalizingFactor = min(((2*radius + 1) / (N_post/N_pre)), N_pre)
 
 % Functions
+% Keep connections to compartment with the same index
+removeRecurrentBool = 0
 % Note that what is passed is 2x the radius
-netcon = netconNearestNeighbors(2*radius, N_pre, N_post)
+netcon = netconNearestNeighbors(2*radius, N_pre, N_post, removeRecurrentBool)
 
 IAMPAdepr_PYdr_TC(X,s,depr) = -fac_AMPAdepr_PYdr_TC*gAMPA/normalizingFactor.*((depr.*s)*netcon).*(X-EAMPA)
 

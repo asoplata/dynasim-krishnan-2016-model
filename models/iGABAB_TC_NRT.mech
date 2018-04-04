@@ -60,8 +60,10 @@ normalizingFactor = min(((2*radius + 1) / (N_post/N_pre)), N_pre)
 
 
 % Functions
+% Keep connections to compartment with the same index
+removeRecurrentBool = 0
 % Note that what is passed is 2x the radius
-netcon = netconNearestNeighbors(2*radius, N_pre, N_post)
+netcon = netconNearestNeighbors(2*radius, N_pre, N_post, removeRecurrentBool)
 
 IGABAB_TC_NRT(X,g) = -fac_GABAB_TC_NRT*gGABAB/normalizingFactor.*((g.^4./(g.^4 + 100))*netcon).*(X-EGABAB)
 
