@@ -71,6 +71,10 @@ resUse = 0.07  % unitless
 % In the original code, this is `Tr`
 tauRecov = 700 % in ms
 
+% Propofol parameters:
+propofolTauMult =  1
+propofolCondMult = 1
+
 % Connective radius, aka how many target cells each source cell connects to,
 %     from the source's perspective.
 radius = 5
@@ -87,14 +91,14 @@ removeRecurrentBool = 0
 % Note that what is passed is 2x the radius
 netcon = netconNearestNeighbors(2*radius, N_pre, N_post, removeRecurrentBool)
 
-IGABAAdepr_PYdr_INso(X,s,depr) = -fac_GABAAdepr_PYdr_INso*gGABAA/normalizingFactor.*((depr.*s)*netcon).*(X-EGABAA)
+IGABAAdepr_PYdr_INso(X,s,depr) = -fac_GABAAdepr_PYdr_INso*propofolCondMult*gGABAA/normalizingFactor.*((depr.*s)*netcon).*(X-EGABAA)
 
 % This way we record the synaptic currents!
 monitor IGABAAdepr_PYdr_INso
 
 
 % ODEs and ICs
-s' = alpha.*(1 + tanh(X_pre./4)).*(1-s) - beta.*s
+s' = alpha.*(1 + tanh(X_pre./4)).*(1-s) - (beta/propofolTauMult).*s
 s(0) = sGABAAIC+sGABAANoiseIC.*rand(1,N_pre)
 
 % This represents the amount of synaptic resources available

@@ -53,6 +53,10 @@ beta  = 0.166 % ms^-1
 %     `fac_GABA_TC`
 fac_GABAA_TC_NRT = 0.55
 
+% Propofol parameters:
+propofolTauMult =  1
+propofolCondMult = 1
+
 % Connective radius, aka how many target cells each source cell connects to,
 %     from the source's perspective.
 radius = 8
@@ -70,14 +74,14 @@ removeRecurrentBool = 0
 netcon = netconNearestNeighbors(2*radius, N_pre, N_post, removeRecurrentBool)
 
 
-IGABAA_TC_NRT(X,s) = -fac_GABAA_TC_NRT*gGABAA/normalizingFactor.*(s*netcon).*(X-EGABAA)
+IGABAA_TC_NRT(X,s) = -fac_GABAA_TC_NRT*propofolCondMult*gGABAA/normalizingFactor.*(s*netcon).*(X-EGABAA)
 
 % This way we record the synaptic currents!
 monitor IGABAA_TC_NRT
 
 
 % ODEs and ICs
-s' = alpha.*(1 + tanh(X_pre./4)).*(1-s) - beta.*s
+s' = alpha.*(1 + tanh(X_pre./4)).*(1-s) - (beta/propofolTauMult).*s
 s(0) = sGABAAIC+sGABAANoiseIC.*rand(1,N_pre)
 
 

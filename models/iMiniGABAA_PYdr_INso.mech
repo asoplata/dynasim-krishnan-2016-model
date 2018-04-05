@@ -53,6 +53,9 @@ epsilon = 0.000001
 %     `fac_GABA_D2`
 fac_MiniGABAA_PYdr_INso = 0.22
 
+% Propofol parameters:
+propofolMiniCondMult = 1
+
 % Connective radius, aka how many target cells each source cell connects to,
 %     from the source's perspective.
 radius = 5
@@ -83,10 +86,10 @@ checkTime(t,lastRelease,newRelease) = ((t-tspike_pre)>100).*((t-lastRelease)>new
 %     contribution themselves. Hence, for data visualization purposes, we only
 %     need to monitor "IMiniGABAA_PYdr_INso_read".
 % In other words, this is the function actually used in the simulation:
-IMiniGABAA_PYdr_INso(X,t,lastRelease,newRelease) = -(checkTime(t,lastRelease,newRelease).*fac_MiniGABAA_PYdr_INso.*gMiniGABAA/normalizingFactor)*netcon.*(X-EGABAA)
+IMiniGABAA_PYdr_INso(X,t,lastRelease,newRelease) = -(checkTime(t,lastRelease,newRelease).*fac_MiniGABAA_PYdr_INso.*propofolMiniCondMult.*gMiniGABAA/normalizingFactor)*netcon.*(X-EGABAA)
 
 % And this is the function that communicates the output for our analysis:
-read_IMiniGABAA_PYdr_INso(X,t,lastRelease) = -((abs(t-lastRelease)<epsilon).*fac_MiniGABAA_PYdr_INso.*gMiniGABAA/normalizingFactor)*netcon.*(X-EGABAA)
+read_IMiniGABAA_PYdr_INso(X,t,lastRelease) = -((abs(t-lastRelease)<epsilon).*fac_MiniGABAA_PYdr_INso.*propofolMiniCondMult.*gMiniGABAA/normalizingFactor)*netcon.*(X-EGABAA)
 
 monitor read_IMiniGABAA_PYdr_INso
 
