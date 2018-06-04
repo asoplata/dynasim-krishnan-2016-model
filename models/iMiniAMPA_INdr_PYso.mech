@@ -53,6 +53,9 @@ epsilon = 0.000001
 %     `fac_AMPA_D2`
 fac_MiniAMPA_INdr_PYso = 0.2
 
+% This is our DynaSim-varied, cell-type-NONspecific adjustment factor
+fac_AMPA_large_vary = 0
+
 % Connective radius, aka how many target cells each source cell connects to,
 %     from the source's perspective.
 radius = 1
@@ -83,10 +86,10 @@ checkTime(t,lastRelease,newRelease) = ((t-tspike_pre)>100).*((t-lastRelease)>new
 %     contribution themselves. Hence, for data visualization purposes, we only
 %     need to monitor "IMiniAMPA_INdr_PYso_read".
 % In other words, this is the function actually used in the simulation:
-IMiniAMPA_INdr_PYso(X,t,lastRelease,newRelease) = -(checkTime(t,lastRelease,newRelease).*fac_MiniAMPA_INdr_PYso.*gMiniAMPA/normalizingFactor)*netcon.*(X-EAMPA)
+IMiniAMPA_INdr_PYso(X,t,lastRelease,newRelease) = -(checkTime(t,lastRelease,newRelease).*(fac_MiniAMPA_INdr_PYso+fac_AMPA_large_vary).*gMiniAMPA/normalizingFactor)*netcon.*(X-EAMPA)
 
 % And this is the function that communicates the output for our analysis:
-read_IMiniAMPA_INdr_PYso(X,t,lastRelease) = -((abs(t-lastRelease)<epsilon).*fac_MiniAMPA_INdr_PYso.*gMiniAMPA/normalizingFactor)*netcon.*(X-EAMPA)
+read_IMiniAMPA_INdr_PYso(X,t,lastRelease) = -((abs(t-lastRelease)<epsilon).*(fac_MiniAMPA_INdr_PYso+fac_AMPA_large_vary).*gMiniAMPA/normalizingFactor)*netcon.*(X-EAMPA)
 
 monitor read_IMiniAMPA_INdr_PYso
 

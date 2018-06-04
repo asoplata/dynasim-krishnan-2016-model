@@ -63,8 +63,8 @@ dt = 0.01; % in milliseconds
 %   number of cells simulated, but keep the same proportions, decrease this
 %   number to something > 0. As an example, using a 
 %   numCellsScaledownFactor of 0.1 (aka using a size of 10%) would 
-%   decrease the population sizes to 5 PYso's and PYdr's, 1 INso and 
-%   INdr, 1 TC, and 1 NRT.
+%   decrease the population sizes to 50 PYso's and PYdr's, 10 INso's and 
+%   INdr's, 10 TC's, and 10 NRT's.
 numCellsScaledownFactor = 0.1;
 
 % "Vary" parameters, aka parameters to be varied -- this tells DynaSim to run a
