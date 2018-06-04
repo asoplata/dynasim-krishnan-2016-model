@@ -15,6 +15,7 @@
 % Parameters
 gKLeak = 0.012  % mS/cm^2
 EKLeak = -95    % mV
+
 % In the original code, this sleep stage experimental factor is represented by
 %     `fac_gkl_RE`
 fac_KLeak_NRT = 0.9  % unitless

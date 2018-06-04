@@ -115,8 +115,8 @@ modifications = {...
     'PYdr<-PYso', 'fac_MiniAMPA_PYdr_PYso', AMPA_to_cortex(stage);
     'INdr<-PYso', 'fac_AMPAdepr_INdr_PYso', AMPA_to_cortex(stage);
     'INdr<-PYso', 'fac_MiniAMPA_INdr_PYso', AMPA_to_cortex(stage);
-    % In the original code, this is called: fac_AMPA_TC. Also, this was never
-    %     actually changed between experimental states!!!
+    % In the original code, this is called: fac_AMPA_TC. Also, this was
+    %     NEVER actually changed between experimental states!!!
     'NRT<-TC',   'fac_AMPA_NRT_TC',   AMPA_to_thal(stage);
     'NRT<-PYso', 'fac_AMPA_NRT_PYso', AMPA_to_thal(stage);
     'TC<-PYso',  'fac_AMPA_TC_PYso',  AMPA_to_thal(stage);

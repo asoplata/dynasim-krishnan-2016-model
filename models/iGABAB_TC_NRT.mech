@@ -49,6 +49,9 @@ k4 = 0.034    % ms^{-1}
 %     `fac_GABA_TC`
 fac_GABAB_TC_NRT = 0.55
 
+% This is our DynaSim-varied, cell-type-NONspecific adjustment factor
+fac_GABA_thal_large_vary = 0
+
 % Connective radius, aka how many target cells each source cell connects to,
 %     from the source's perspective.
 radius = 8
@@ -65,7 +68,7 @@ removeRecurrentBool = 0
 % Note that what is passed is 2x the radius
 netcon = netconNearestNeighbors(2*radius, N_pre, N_post, removeRecurrentBool)
 
-IGABAB_TC_NRT(X,g) = -fac_GABAB_TC_NRT*gGABAB/normalizingFactor.*((g.^4./(g.^4 + 100))*netcon).*(X-EGABAB)
+IGABAB_TC_NRT(X,g) = -(fac_GABAB_TC_NRT+fac_GABA_thal_large_vary)*gGABAB/normalizingFactor.*((g.^4./(g.^4 + 100))*netcon).*(X-EGABAB)
 
 % This way we record the synaptic currents!
 monitor IGABAB_TC_NRT

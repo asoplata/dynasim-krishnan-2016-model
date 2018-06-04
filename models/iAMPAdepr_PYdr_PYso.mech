@@ -52,7 +52,7 @@ beta  = 0.19 % ms^-1
 fac_AMPAdepr_PYdr_PYso = 0.2
 
 % This is our DynaSim-varied, cell-type-NONspecific adjustment factor
-fac_AMPA_large_vary = 0
+fac_AMPA_cort_large_vary = 0
 
 % Synaptic depression parameters:
 % The proportion of total "resources" used in each action potential
@@ -77,7 +77,7 @@ removeRecurrentBool = 1
 % Note that what is passed is 2x the radius
 netcon = netconNearestNeighbors(2*radius, N_pre, N_post, removeRecurrentBool)
 
-IAMPAdepr_PYdr_PYso(X,s,depr) = -(fac_AMPAdepr_PYdr_PYso+fac_AMPA_large_vary)*gAMPA/normalizingFactor.*((depr.*s)*netcon).*(X-EAMPA)
+IAMPAdepr_PYdr_PYso(X,s,depr) = -(fac_AMPAdepr_PYdr_PYso+fac_AMPA_cort_large_vary)*gAMPA/normalizingFactor.*((depr.*s)*netcon).*(X-EAMPA)
 
 % This way we record the synaptic currents!
 monitor IAMPAdepr_PYdr_PYso
