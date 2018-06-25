@@ -1,4 +1,4 @@
-% # CaBuffer_NRT: Calcium buffer concentration dynamics, for generic
+% # CaBuffer_TRN: Calcium buffer concentration dynamics, for generic
 %     thalamic reticular cells used in the DynaSim implementation of (Krishnan
 %     et al., 2016). Note that in the original code, this celltype is called
 %     RE, and this mechanism is identified as ICa, even though it is not a
@@ -12,11 +12,11 @@
 %         al. Cellular and neurochemical basis of sleep stages in the
 %         thalamocortical network. eLife. 2016;5: e18607
 %
-% - Requires: "@IT_NRT" exposed by "iT_NRT" mechanism (which is,
+% - Requires: "@IT_TRN" exposed by "iT_TRN" mechanism (which is,
 %     confusingly, called "IT_RE", NOT ICa, in the original code).
 %
-% - Exposes: calcium concentration "@CaBuffer_NRT" required for
-%     "iT_NRT" mechanism
+% - Exposes: calcium concentration "@CaBuffer_TRN" required for
+%     "iT_TRN" mechanism
 %
 % - Tags: calcium, intrinsic, thalamus, reticular
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -32,8 +32,8 @@ CaBufferNoiseIC = 0.0001
 
 % ODEs
 % In original code, the CaBuffer requires input only from IT_RE
-CaBuffer_NRT' = max(-A.*@IT_NRT./D, 0) + (Ca_inf - CaBuffer_NRT)./tauR
-CaBuffer_NRT(0) = CaBufferIC+CaBufferNoiseIC.*rand(1,Npop)
+CaBuffer_TRN' = max(-A.*@IT_TRN./D, 0) + (Ca_inf - CaBuffer_TRN)./tauR
+CaBuffer_TRN(0) = CaBufferIC+CaBufferNoiseIC.*rand(1,Npop)
 
 % Interface
-@CaBuffer_NRT += CaBuffer_NRT
+@CaBuffer_TRN += CaBuffer_TRN

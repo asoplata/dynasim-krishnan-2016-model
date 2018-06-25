@@ -1,8 +1,8 @@
-% # iGABAB_TC_NRT: Normalized synaptic GABA-Bergic inhibitory current FROM the
-%     nucleus reticular thalamic cell TO thalamocortical cell TC<-NRT
+% # iGABAB_TC_TRN: Normalized synaptic GABA-Bergic inhibitory current FROM the
+%     nucleus reticular thalamic cell TO thalamocortical cell TC<-TRN
 %     connection used in the DynaSim implementation of (Krishnan et al., 2016).
 %     Note that in the original code, the class for this current is called
-%     GABA_B, and NRT cells are called RE cells.
+%     GABA_B, and TRN cells are called RE cells.
 %
 % - Source: This was built from the original paper's code, using "currents.h"
 %     lines 615-651, 1162, "currents.cpp" lines 316-343, "CellSyn.h" lines
@@ -24,7 +24,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Parameters
 %
-% For the NRT (RE) to TC connection, the conductance is given by the original
+% For the TRN (RE) to TC connection, the conductance is given by the original
 %     paper "absolutely" as 0.02 uS. However, in the original code, the value
 %     is given in unknown units as 0.000002, but we will begin by using the
 %     paper value. We first need to normalize this value over the area of the
@@ -47,7 +47,7 @@ k4 = 0.034    % ms^{-1}
 
 % In the original code, this sleep stage experimental factor is represented by
 %     `fac_GABA_TC`
-fac_GABAB_TC_NRT = 0.55
+fac_GABAB_TC_TRN = 0.55
 
 % This is our DynaSim-varied, cell-type-NONspecific adjustment factor
 fac_GABA_thal_large_vary = 0
@@ -68,10 +68,10 @@ removeRecurrentBool = 0
 % Note that what is passed is 2x the radius
 netcon = netconNearestNeighbors(2*radius, N_pre, N_post, removeRecurrentBool)
 
-IGABAB_TC_NRT(X,g) = -(fac_GABAB_TC_NRT+fac_GABA_thal_large_vary)*gGABAB/normalizingFactor.*((g.^4./(g.^4 + 100))*netcon).*(X-EGABAB)
+IGABAB_TC_TRN(X,g) = -(fac_GABAB_TC_TRN+fac_GABA_thal_large_vary)*gGABAB/normalizingFactor.*((g.^4./(g.^4 + 100))*netcon).*(X-EGABAB)
 
 % This way we record the synaptic currents!
-monitor IGABAB_TC_NRT
+monitor IGABAB_TC_TRN
 
 
 % ODEs and ICs
@@ -82,4 +82,4 @@ g(0) = gGABABIC+gGABABNoiseIC.*rand(1,N_pre)
 
 
 % Linker
-@current += IGABAB_TC_NRT(X_post,g)
+@current += IGABAB_TC_TRN(X_post,g)

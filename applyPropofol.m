@@ -36,11 +36,11 @@ modifications = {...
     'PYdr<-INso', 'propofolCondMult',     condMultiplier;
     'PYdr<-INso', 'propofolMiniCondMult', condMultiplier;
 
-    'NRT<-NRT', 'propofolTauMult',  decayTimeMultiplier;
-    'NRT<-NRT', 'propofolCondMult', condMultiplier;
+    'TRN<-TRN', 'propofolTauMult',  decayTimeMultiplier;
+    'TRN<-TRN', 'propofolCondMult', condMultiplier;
 
-    'TC<-NRT', 'propofolTauMult',   decayTimeMultiplier;
-    'TC<-NRT', 'propofolCondMult',  condMultiplier;
+    'TC<-TRN', 'propofolTauMult',   decayTimeMultiplier;
+    'TC<-TRN', 'propofolCondMult',  condMultiplier;
 };
 
 % ------------------------------------------

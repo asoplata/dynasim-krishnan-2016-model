@@ -1,4 +1,4 @@
-% # iK_NRT: Fast potassium current, for generic thalamic reticular cells used
+% # iK_TRN: Fast potassium current, for generic thalamic reticular cells used
 %     in the DynaSim implementation of (Krishnan et al., 2016). Note that in
 %     the original code, this celltype is called RE, and this current is called
 %     INaK.
@@ -36,13 +36,13 @@ alphaN(X) = 0.032.*(15 - (X-vShift))./(exp((15 - (X-vShift))./5) - 1)
 betaN(X) = 0.5.*exp((10 - (X-vShift))./40)
 tauN(X) = 1./(alphaN(X) + betaN(X))
 Ninf(X) = alphaN(X)./(alphaN(X) + betaN(X))
-IK_NRT(X,nK) = -gK.*nK.^4.*(X-EK)
+IK_TRN(X,nK) = -gK.*nK.^4.*(X-EK)
 
-monitor IK_NRT
+monitor IK_TRN
 
 % ODEs and ICs
 nK' = (Ninf(X)-nK)./tauN(X)
 nK(0)=nKIC+nKNoiseIC.*rand(1,Npop)
 
 % Linker
-@current += IK_NRT(X,nK)
+@current += IK_TRN(X,nK)

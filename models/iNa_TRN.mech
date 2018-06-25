@@ -1,4 +1,4 @@
-% # iNa_NRT: Fast sodium current for generic thalamic reticular cells used in
+% # iNa_TRN: Fast sodium current for generic thalamic reticular cells used in
 %     the DynaSim implementation of (Krishnan et al., 2016). Note that in the
 %     original code, this celltype is called RE, and this current is called
 %     INaK.
@@ -45,9 +45,9 @@ betaH(X) =  4./(exp((40 - (X-vShift))./5) + 1)
 tauH(X) = 1./(alphaH(X) + betaH(X))
 Hinf(X) = alphaH(X)./(alphaH(X) + betaH(X))
 
-INa_NRT(X,mNa,hNa) = -gNa.*mNa.^3.*hNa.*(X-ENa)
+INa_TRN(X,mNa,hNa) = -gNa.*mNa.^3.*hNa.*(X-ENa)
 
-monitor INa_NRT
+monitor INa_TRN
 
 % ODEs and ICs
 mNa' = (Minf(X)-mNa)./tauM(X)
@@ -56,4 +56,4 @@ hNa' = (Hinf(X)-hNa)./tauH(X)
 hNa(0)=hNaIC+hNaNoiseIC.*rand(1, Npop)
 
 % Linker
-@current += INa_NRT(X,mNa,hNa)
+@current += INa_TRN(X,mNa,hNa)

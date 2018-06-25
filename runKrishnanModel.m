@@ -59,12 +59,12 @@ time_end = 1000; % in milliseconds
 dt = 0.01; % in milliseconds
 
 % For the full size model (500 PYso's and PYdr's, 100 INso's and INdr's, 100
-%   TC's, and 100 NRT's), use a `numCellsScaledownFactor` of 1. To lower the
+%   TC's, and 100 TRN's), use a `numCellsScaledownFactor` of 1. To lower the
 %   number of cells simulated, but keep the same proportions, decrease this
 %   number to something > 0. As an example, using a 
 %   numCellsScaledownFactor of 0.1 (aka using a size of 10%) would 
 %   decrease the population sizes to 50 PYso's and PYdr's, 10 INso's and 
-%   INdr's, 10 TC's, and 10 NRT's.
+%   INdr's, 10 TC's, and 10 TRN's.
 numCellsScaledownFactor = 0.1;
 
 % "Vary" parameters, aka parameters to be varied -- this tells DynaSim to run a

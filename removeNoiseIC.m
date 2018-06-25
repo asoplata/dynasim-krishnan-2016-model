@@ -31,7 +31,7 @@ function output = removeNoiseIC(krishnanSpecification)
 % ------------------------------------------
 modifications  = {...
   'INdr',        'CaBufferNoiseIC'     ,     0;
-  'NRT',         'CaBufferNoiseIC'     ,     0;
+  'TRN',         'CaBufferNoiseIC'     ,     0;
   'PYdr',        'CaBufferNoiseIC'     ,     0;
   'TC',          'CaBufferNoiseIC'     ,     0;
   'INdr<-PYso',  'sAMPANoiseIC'        ,     0;
@@ -42,15 +42,15 @@ modifications  = {...
   'PYdr<-PYso',  'deprAMPANoiseIC'     ,     0;
   'PYdr<-TC',    'sAMPANoiseIC'        ,     0;
   'PYdr<-TC',    'deprAMPANoiseIC'     ,     0;
-  'NRT<-PYso',   'sAMPANoiseIC'        ,     0;
-  'NRT<-TC',     'sAMPANoiseIC'        ,     0;
+  'TRN<-PYso',   'sAMPANoiseIC'        ,     0;
+  'TRN<-TC',     'sAMPANoiseIC'        ,     0;
   'TC<-PYso',    'sAMPANoiseIC'        ,     0;
   'PYdr<-INso',  'sGABAANoiseIC'       ,     0;
   'PYdr<-INso',  'deprGABAANoiseIC'    ,     0;
-  'NRT<-NRT',    'sGABAANoiseIC'       ,     0;
-  'TC<-NRT',     'sGABAANoiseIC'       ,     0;
-  'TC<-NRT',     'rGABABNoiseIC'       ,     0;
-  'TC<-NRT',     'gGABABNoiseIC'       ,     0;
+  'TRN<-TRN',    'sGABAANoiseIC'       ,     0;
+  'TC<-TRN',     'sGABAANoiseIC'       ,     0;
+  'TC<-TRN',     'rGABABNoiseIC'       ,     0;
+  'TC<-TRN',     'gGABABNoiseIC'       ,     0;
   'TC',          'OpenHNoiseIC'        ,     0;
   'TC',          'PoneHNoiseIC'        ,     0;
   'TC',          'OpenLockedHNoiseIC'  ,     0;
@@ -61,7 +61,7 @@ modifications  = {...
   'INdr',        'mKCaNoiseIC'         ,     0;
   'PYdr',        'mKCaNoiseIC'         ,     0;
   'INso',        'nKNoiseIC'           ,     0;
-  'NRT',         'nKNoiseIC'           ,     0;
+  'TRN',         'nKNoiseIC'           ,     0;
   'PYso',        'nKNoiseIC'           ,     0;
   'TC',          'nKNoiseIC'           ,     0;
   'INdr',        'mMNoiseIC'           ,     0;
@@ -76,8 +76,8 @@ modifications  = {...
   'INdr',        'hNaNoiseIC'          ,     0;
   'INso',        'mNaNoiseIC'          ,     0;
   'INso',        'hNaNoiseIC'          ,     0;
-  'NRT',         'mNaNoiseIC'          ,     0;
-  'NRT',         'hNaNoiseIC'          ,     0;
+  'TRN',         'mNaNoiseIC'          ,     0;
+  'TRN',         'hNaNoiseIC'          ,     0;
   'PYdr',        'mNaPNoiseIC'         ,     0;
   'PYso',        'mNaPNoiseIC'         ,     0;
   'PYdr',        'mNaNoiseIC'          ,     0;
@@ -88,8 +88,8 @@ modifications  = {...
   'TC',          'hNaNoiseIC'          ,     0;
   'INdr<-PYso',  'sNMDANoiseIC'        ,     0;
   'PYdr<-PYso',  'sNMDANoiseIC'        ,     0;
-  'NRT',         'mTNoiseIC'           ,     0;
-  'NRT',         'hTNoiseIC'           ,     0;
+  'TRN',         'mTNoiseIC'           ,     0;
+  'TRN',         'hTNoiseIC'           ,     0;
   'TC',          'mTNoiseIC'           ,     0;
   'TC',          'hTNoiseIC'           ,     0;
   'INdr',        'vNoiseIC'            ,     0;
@@ -97,7 +97,7 @@ modifications  = {...
   'PYdr',        'vNoiseIC'            ,     0;
   'PYso',        'vNoiseIC'            ,     0;
   'TC',          'vNoiseIC'            ,     0;
-  'NRT',         'vNoiseIC'            ,     0;
+  'TRN',         'vNoiseIC'            ,     0;
 };
 
 % ------------------------------------------

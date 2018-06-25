@@ -1,16 +1,15 @@
-% # iAMPA_NRT_PYso: Normalized synaptic AMPAergic excitatory current FROM the
-%     pyramidal axo-soma compartment TO nuclear reticular thalamus NRT<-PYso
+% # iAMPA_TRN_TC: Normalized synaptic AMPAergic excitatory current FROM the
+%     thalamocortical cell TO nucleus reticular thalamic cell TRN<-TC
 %     connection used in the DynaSim implementation of (Krishnan et al., 2016).
 %     Note that in the original code, the class for this current is called
-%     AMPA, PYso are called CX or CX_SOMA, and NRT are called RE. Also note
-%     that, instead of using a Heaviside increase in transmitter concentration
-%     upon spike detection, we used the (1 + tanh(V/4)) formulation from
-%     (Ermentrout & Kopell, 1998) for our spike detector and transmitter
-%     concentration model.
+%     AMPA, and TRN cells are called RE cells. Also note that, instead of using
+%     a Heaviside increase in transmitter concentration upon spike detection,
+%     we used the (1 + tanh(V/4)) formulation from (Ermentrout & Kopell, 1998)
+%     for our spike detector and transmitter concentration model.
 %
 % - Source: This was built from the original paper's code, using "currents.h"
-%     lines 694-721, 1123, "currents.cpp" lines 390-431, and
-%     "network.cfg" line 35.
+%     lines 694-721, 1123, "currents.cpp" lines 391-431, and "network.cfg" line
+%     26.
 %
 % - Dependencies:
 %     - netconNearestNeighbors.m
@@ -27,15 +26,15 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Parameters
 %
-% For the PYso to NRT connection, the conductance is given by the original
-%     paper "absolutely" as 0.015 uS. We first need to normalize this value over
+% For the TC to TRN (RE) connection, the conductance is given by the original
+%     paper "absolutely" as 0.05 uS. We first need to normalize this value over
 %     the area of the target cell and convert the conductance to mS/cm^2. We do
-%     this by converting uS to mS and dividing by the area of the target NRT
-%     cells:
+%     this by converting uS to mS and dividing by the area of the target TRN
+%     neurons:
 %
-%    0.015 uS * (1 mS / 1000 uS) * (1 / (1.43e-4 cm^2)) = 0.105 mS/cm^2
+%    0.05 uS * (1 mS / 1000 uS) * (1 / 1.43e-4 cm^2)) = 0.35 mS/cm^2
 %
-gAMPA = 0.105 % mS/cm^2
+gAMPA = 0.35 % mS/cm^2
 EAMPA = 0    % mV
 sAMPAIC = 0.1
 sAMPANoiseIC = 0.1
@@ -47,7 +46,7 @@ beta  = 0.19 % ms^-1
 
 % In the original code, this sleep stage experimental factor is represented by
 %     `fac_AMPA_TC`
-fac_AMPA_NRT_PYso = 0.5
+fac_AMPA_TRN_TC = 0.5
 
 % Connective radius, aka how many target cells each source cell connects to,
 %     from the source's perspective.
@@ -65,10 +64,10 @@ removeRecurrentBool = 0
 % Note that what is passed is 2x the radius
 netcon = netconNearestNeighbors(2*radius, N_pre, N_post, removeRecurrentBool)
 
-IAMPA_NRT_PYso(X,s) = -fac_AMPA_NRT_PYso*gAMPA/normalizingFactor.*(s*netcon).*(X-EAMPA)
+IAMPA_TRN_TC(X,s) = -fac_AMPA_TRN_TC*gAMPA/normalizingFactor.*(s*netcon).*(X-EAMPA)
 
 % This way we record the synaptic currents!
-monitor IAMPA_NRT_PYso
+monitor IAMPA_TRN_TC
 
 
 % ODEs and ICs
@@ -76,5 +75,6 @@ s' = alpha.*(1 + tanh(X_pre./4)).*(1-s) - beta.*s
 s(0) = sAMPAIC+sAMPANoiseIC.*rand(1,N_pre)
 
 
+
 % Linker
-@current += IAMPA_NRT_PYso(X_post,s)
+@current += IAMPA_TRN_TC(X_post,s)

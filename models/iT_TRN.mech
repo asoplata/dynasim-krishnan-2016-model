@@ -1,4 +1,4 @@
-% # iT_NRT: T-type Low-threshold Calcium current for generic thalamic
+% # iT_TRN: T-type Low-threshold Calcium current for generic thalamic
 %     reticular cells used in the DynaSim implementation of (Krishnan et al.,
 %     2016). Note that in the original code, this celltype is called RE and
 %     this current is called IT_RE. In the original paper this mechanism is
@@ -18,10 +18,10 @@
 %         of ferret thalamic slices. Journal of Neurophysiology. 1996;76:
 %         2049–2070.
 %
-% - Requires: @CaBuffer_NRT calcium concentration exposed by
-%     "CaBuffer_NRT" mechanism
+% - Requires: @CaBuffer_TRN calcium concentration exposed by
+%     "CaBuffer_TRN" mechanism
 %
-% - Exposes: @IT_NRT calcium current as required by "CaBuffer_NRT"
+% - Exposes: @IT_TRN calcium current as required by "CaBuffer_TRN"
 %
 % - Tags: calcium, current, intrinsic, thalamic, reticular
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -39,7 +39,7 @@ hTIC = 0.35
 hTNoiseIC = 0.1
 
 % Functions
-ET(CaBuffer_NRT) = 1000.*8.31441.*(273.15+36)./(2.*96846).*log(2./CaBuffer_NRT) % mV
+ET(CaBuffer_TRN) = 1000.*8.31441.*(273.15+36)./(2.*96846).*log(2./CaBuffer_TRN) % mV
 
 Minf(X) = 1./(1+exp(-(X+vShift+50)./7.4))
 tauM(X) = (3.  + 1.0./(exp((X+vShift+25)./10) + exp(-(X+vShift+100)./15)))./phiM
@@ -48,9 +48,9 @@ Hinf(X) = 1./(1+exp((X+vShift+78)./5))
 tauH(X) = (85. + 1.0./(exp((X+vShift+46)./4)  + exp(-(X+vShift+405)./50)))./phiH
 
 % Note: For why the current term was not made negative here, see below.
-IT_NRT(X,mT,hT,CaBuffer_NRT) = gT.*mT.^2.*hT.*(X-ET(@CaBuffer_NRT))
+IT_TRN(X,mT,hT,CaBuffer_TRN) = gT.*mT.^2.*hT.*(X-ET(@CaBuffer_TRN))
 
-monitor IT_NRT
+monitor IT_TRN
 
 % ODEs and ICs
 mT' = (Minf(X)-mT)./tauM(X)
@@ -61,7 +61,7 @@ hT(0)=hTIC+hTNoiseIC.*rand(1,Npop)
 % Interface
 % Note: Usually in DynaSim, the current is made negative before being assigned
 %     to a linker, but in this case, the below is less confusing since exposing
-%     IT_NRT for the CaBuffer_NRT mechanism requires a
-%     not-made-negative version of IT_NRT.
-@current += -IT_NRT(X,mT,hT,CaBuffer_NRT)
-@IT_NRT += IT_NRT(X,mT,hT,CaBuffer_NRT)
+%     IT_TRN for the CaBuffer_TRN mechanism requires a
+%     not-made-negative version of IT_TRN.
+@current += -IT_TRN(X,mT,hT,CaBuffer_TRN)
+@IT_TRN += IT_TRN(X,mT,hT,CaBuffer_TRN)
