@@ -51,7 +51,7 @@ epsilon = 0.000001
 
 % In the original code, this sleep stage experimental factor is represented by
 %     `fac_GABA_D2`
-fac_MiniGABAA_PYdr_INso = 0.22
+fac_MiniGABAA_PYdr_INso = 0.286
 
 % This is our DynaSim-varied, cell-type-NONspecific adjustment factor
 fac_GABAA_cort_large_vary = 0

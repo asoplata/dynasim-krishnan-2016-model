@@ -20,7 +20,7 @@ EKLeak = -95    % mV
 
 % In the original code, this sleep stage experimental factor is represented by
 %     `fac_gkl`
-fac_KLeak_INdr = 0.19
+fac_KLeak_INdr = 0.342
 
 % This is our DynaSim-varied, cell-type-NONspecific adjustment factor
 fac_KLeak_cort_large_vary = 0

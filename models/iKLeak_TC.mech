@@ -16,7 +16,7 @@ gKLeak = 0.01   % mS/cm^2
 EKLeak = -95    % mV
 % In the original code, this sleep stage experimental factor is represented by
 %     `fac_gkl_TC`
-fac_KLeak_TC = 0.79  % unitless
+fac_KLeak_TC = 1.42  % unitless
 
 % Functions
 IKLeak_TC(X) = -fac_KLeak_TC.*gKLeak.*(X-EKLeak)

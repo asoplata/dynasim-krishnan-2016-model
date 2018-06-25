@@ -51,7 +51,7 @@ beta  = 0.166 % ms^-1
 
 % In the original code, this sleep stage experimental factor is represented by
 %     `fac_GABA_TC`
-fac_GABAA_TC_TRN = 0.55
+fac_GABAA_TC_TRN = 0.715
 
 % This is our DynaSim-varied, cell-type-NONspecific adjustment factor
 fac_GABA_thal_large_vary = 0

@@ -50,7 +50,7 @@ beta  = 0.19 % ms^-1
 
 % In the original code, this sleep stage experimental factor is represented by
 %     `fac_AMPA_D2`
-fac_AMPAdepr_INdr_PYso = 0.2
+fac_AMPAdepr_INdr_PYso = 0.396
 
 % This is our DynaSim-varied, cell-type-NONspecific adjustment factor
 fac_AMPA_cort_large_vary = 0

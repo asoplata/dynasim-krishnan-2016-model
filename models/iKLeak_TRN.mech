@@ -18,7 +18,7 @@ EKLeak = -95    % mV
 
 % In the original code, this sleep stage experimental factor is represented by
 %     `fac_gkl_RE`
-fac_KLeak_TRN = 0.9  % unitless
+fac_KLeak_TRN = 0.54  % unitless
 
 % Functions
 IKLeak_TRN(X) = -fac_KLeak_TRN.*gKLeak.*(X-EKLeak)
