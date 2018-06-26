@@ -1,0 +1,69 @@
+% # iMiniAMPASimple_PYdr_PYso: Normalized synaptic randomized "mini" AMPAergic
+%     excitatory current FROM the pyramidal axo-soma compartment TO pyramidal
+%     dendrite PYdr<-PYso connection used in the DynaSim implementation of
+%     (Krishnan et al., 2016). Note that in the original code, the class for
+%     this current is called AMPA_D2, PYso are called CX or CX_SOMA, and PYdr
+%     are called CX or CX_DEND. Also note that, instead of using a Heaviside
+%     increase in transmitter concentration upon spike detection, we used the
+%     (1 + tanh(V/4)) formulation from (Ermentrout & Kopell, 1998) for our
+%     spike detector and transmitter concentration model.
+%
+% - Source: This was built from the original paper's code, using "currents.h"
+%     lines 694-721, 1258, 1280-1281, "currents.cpp" lines 390-431, and
+%     "network.cfg" line 35.
+%
+% - Dependencies:
+%     - netconNearestNeighbors.m
+%     - newReleaseUpdate.m
+%
+% - References:
+%     - Ermentrout GB, Kopell N. Fine structure of neural spiking and
+%         synchronization in the presence of conduction delays. Proceedings of
+%         the National Academy of Sciences. 1998;95: 1259–1264.
+%     - Krishnan GP, Chauvette S, Shamie I, Soltani S, Timofeev I, Cash SS, et
+%         al. Cellular and neurochemical basis of sleep stages in the
+%         thalamocortical network. eLife. 2016;5: e18607
+%
+% - Tags: synapse, connection, excitation, ampa
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Parameters
+%
+% For the PYso to PYdr connection, the conductance is given by the original
+%     paper "absolutely" as 0.033 uS. We first need to normalize this value over
+%     the area of the target cell and convert the conductance to mS/cm^2. We do
+%     this by converting uS to mS and dividing by the area of the target PYdr
+%     cells:
+%
+%    0.033 uS * (1 mS / 1000 uS) * (1 / (165e-6 cm^2)) = 0.2 mS/cm^2
+%
+gMiniAMPA = 0.2 % mS/cm^2
+EAMPA = 0        % mV
+% poisson parameters
+baseline=0;     % sp/s, baseline rate
+DC=10;          % sp/s, steady component of the signal
+AC=0;           % sp/s, oscillatory component of the signal
+f=0;            % Hz, modulation frequency of the signal
+phi=0;          % radians, phase at which the signal begins
+onset=0;        % ms, start time of signal
+offset=inf;     % ms, stop time of signal
+tau=2;          % ms, synaptic time constant
+
+% poisson conductance
+s=getPoissonGating(baseline,DC,AC,f,phi,onset,offset,tau,T,N_post);
+
+% In the original code, this sleep stage experimental factor is represented by
+%     `fac_AMPA_D2`
+fac_MiniAMPA_PYdr_PYso = 0.396
+
+% This is our DynaSim-varied, cell-type-NONspecific adjustment factor
+fac_AMPA_cort_large_vary = 0
+
+% conductance
+gPoisson(t)=s(k,:)
+
+IMiniAMPASimple_PYdr_PYso(X) = -(gPoisson(t).*(fac_MiniAMPA_PYdr_PYso+fac_AMPA_cort_large_vary).*gMiniAMPA).*(X-EAMPA)
+
+monitor IMiniAMPASimple_PYdr_PYso
+
+% Linker
+@current += IMiniAMPASimple_PYdr_PYso(X)
