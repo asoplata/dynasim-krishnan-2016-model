@@ -25,7 +25,8 @@
 % - Tags: calcium, potassium, current, intrinsic, pyramidal, dendrite
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Parameters
-gKCa = 0.05 % mS/cm^2
+gKCa = 0.3 % mS/cm^2
+% gKCa = 0.05 % mS/cm^2
 EKCa = -90  % mV
 % The Q10 temperature adjustment values never change over the course of the
 %     simulations, so we are setting them to be constant.
@@ -33,7 +34,7 @@ EKCa = -90  % mV
 phiM = 2.3^((36-23)/10)
 
 mKCaIC = 0.1
-mKCaNoiseIC = 0.1
+mKCaNoiseIC = 01
 
 % In the original code, this sleep stage experimental factor is represented by
 %     `fac_gkca_cx`, but it is never used!
@@ -42,8 +43,11 @@ fac_KCa_PYdr = 1  % unitless
 % Functions
 % In original code, there is a note that the Cai exponent is 1
 alphaM(CaBuffer_PYdr) = 0.01.*CaBuffer_PYdr
+% alphaM(CaBuffer_PYdr) = CaBuffer_PYdr
 betaM = 0.02
+% tauM(CaBuffer_PYdr) = 0.34./(@CaBuffer_PYdr + 2)
 tauM(CaBuffer_PYdr) = (1./(alphaM(@CaBuffer_PYdr) + betaM))./phiM
+% Minf(CaBuffer_PYdr) = @CaBuffer_PYdr./(@CaBuffer_PYdr + 2)
 Minf(CaBuffer_PYdr) = alphaM(@CaBuffer_PYdr)./(alphaM(@CaBuffer_PYdr) + betaM)
 IKCa_PYdr(X,mKCa) = -phiM.*fac_KCa_PYdr.*gKCa.*mKCa.*(X-EKCa)
 

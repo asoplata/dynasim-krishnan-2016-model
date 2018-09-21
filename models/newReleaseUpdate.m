@@ -25,10 +25,15 @@ end
 %     when timeSinceSpike is small or zero, this causes our `output` to be Inf,
 %     divided by zero, or astronomically large, which turns our values into
 %     NaNs silently, which completely (and silently) breaks the simulation!
-timeDifference = timeSinceSpike + (timeSinceSpike < 100).*100;
+% AES
+% timeDifference = timeSinceSpike + (timeSinceSpike < 100).*100;
+timeDifference = timeSinceSpike + (timeSinceSpike < 70).*70;
 
 % The denominator here corresponds to the `SS` in the original code, in
 %     "currents.cpp" line 520.
-output = -log(S)./((2.0./(1.0+exp(-timeDifference./miniFreq))-1.0)./250.0);
+% AES
+% output = -log(S)./((2.0./(1.0+exp(-timeDifference./miniFreq))-1.0)./250.0);
+tau = 50
+output = -log(S)./(log((timeDifference + tau)./tau)./400.0);
 
 end

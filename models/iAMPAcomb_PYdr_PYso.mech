@@ -1,3 +1,33 @@
+% # iAMPAcomb_PYdr_PYso: Normalized synaptic AMPAergic excitatory current,
+
+% AES omfg
+
+%     with synaptic depression, FROM the pyramidal axo-soma TO pyramidal
+%     dendrite PYdr<-PYso connection used in the DynaSim implementation of
+%     (Krishnan et al., 2016). Note that in the original code, the class for
+%     this current is called AMPA_D2, PYso are called CX or CX_SOMA, and PYdr
+%     are called CX or CX_DEND. Also note that, instead of using a Heaviside
+%     increase in transmitter concentration upon spike detection, we used the
+%     (1 + tanh(V/4)) formulation from (Ermentrout & Kopell, 1998) for our
+%     spike detector and transmitter concentration model.
+%
+% - Source: This was built from the original paper's code, using "currents.h"
+%     lines 219, 762-805, 1258, 1280-1281, "currents.cpp" lines 489-548, and
+%     "network.cfg" line 31.
+%
+% - Dependencies:
+%     - netconNearestNeighbors.m
+%
+% - References:
+%     - Ermentrout GB, Kopell N. Fine structure of neural spiking and
+%         synchronization in the presence of conduction delays. Proceedings of
+%         the National Academy of Sciences. 1998;95: 1259–1264.
+%     - Krishnan GP, Chauvette S, Shamie I, Soltani S, Timofeev I, Cash SS, et
+%         al. Cellular and neurochemical basis of sleep stages in the
+%         thalamocortical network. eLife. 2016;5: e18607
+%
+% - Tags: synapse, connection, excitation, ampa
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % # iMiniAMPA_PYdr_PYso: Normalized synaptic randomized "mini" AMPAergic
 %     excitatory current FROM the pyramidal axo-soma compartment TO pyramidal
 %     dendrite PYdr<-PYso connection used in the DynaSim implementation of
@@ -26,6 +56,7 @@
 %
 % - Tags: synapse, connection, excitation, ampa
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 % Parameters
 %
 % For the PYso to PYdr connection, the conductance is given by the original
@@ -51,25 +82,64 @@ epsilon = 0.000001
 
 % In the original code, this sleep stage experimental factor is represented by
 %     `fac_AMPA_D2`
-fac_MiniAMPA_PYdr_PYso = 0.396
+fac_MiniAMPA_PYdr_PYso = 1
 
 % This is our DynaSim-varied, cell-type-NONspecific adjustment factor
 fac_AMPA_cort_large_vary = 0
+
+
+% Parameters
+%
+% For the PYso to PYdr connection, the conductance is given by the original
+%     paper "absolutely" as 0.024 uS. We first need to normalize this value over
+%     the area of the target cell and convert the conductance to mS/cm^2. We do
+%     this by converting uS to mS and dividing by the area of the target PYdr
+%     compartments:
+%
+%    0.024 uS * (1 mS / 1000 uS) * (1 / (165*1e-6 cm^2)) = 0.15 mS/cm^2
+%
+gAMPA = 0.15 % mS/cm^2
+EAMPA = 0    % mV
+sAMPAIC = 0.1
+sAMPANoiseIC = 0.1
+deprAMPAIC = 0.9
+deprAMPANoiseIC = 0.1
+
+% Note that alpha rate here corresponds to the inverse of the rise  time constant, 1/tauR, and
+%        the beta rate here corresponds to the inverse of the decay time constant, 1/tauD
+% alpha = 1.1  % ms^-1
+% beta  = 0.19 % ms^-1
+alpha = 0.94  % ms^-1
+beta  = 0.18 % ms^-1
+
+% In the original code, this sleep stage experimental factor is represented by
+%     `fac_AMPA_D2`
+fac_AMPAcomb_PYdr_PYso = 1
+
+% This is our DynaSim-varied, cell-type-NONspecific adjustment factor
+fac_AMPA_cort_large_vary = 0
+
+% Synaptic depression parameters:
+% The proportion of total "resources" used in each action potential
+% In the original code, this is `Use`
+resUse = 0.07  % unitless
+resUseMini = 0  % unitless
+% In the original code, this is `Tr`
+tauRecov = 700 % in ms
 
 % Connective radius, aka how many target cells each source cell connects to,
 %     from the source's perspective.
 radius = 5
 
-% Functions
 % We also need to normalize the conductance in mS/cm^2 by the number of
-%     connections each target cell is receiving on average, so that the TOTAL
-%     sum of their conductive inputs adds to our overall maximal conductance
-%     above.
+%     connections each target cell is receiving on average, so that the TOTAL sum
+%     of their conductive inputs adds to our overall maximal conductance above.
 normalizingFactor = min(((2*radius + 1) / (N_post/N_pre)), N_pre)
 
+% Functions
 % Remove autapses to the dendrite corresponding to this soma
 removeRecurrentBool = 1
-% Note that what is passed is 2x the radius.
+% Note that what is passed is 2x the radius
 netcon = netconNearestNeighbors(2*radius, N_pre, N_post, removeRecurrentBool)
 
 % This checks for if there has been enough time since the last spike AND the
@@ -91,8 +161,14 @@ IMiniAMPA_PYdr_PYso(X,t,lastRelease,newRelease) = -(checkTime(t,lastRelease,newR
 % And this is the function that communicates the output for our analysis:
 read_IMiniAMPA_PYdr_PYso(X,t,lastRelease) = -((abs(t-lastRelease)<epsilon).*(fac_MiniAMPA_PYdr_PYso+fac_AMPA_cort_large_vary).*gMiniAMPA/normalizingFactor)*netcon.*(X-EAMPA)
 
-monitor read_IMiniAMPA_PYdr_PYso
 
+IAMPAcomb_PYdr_PYso(X,s,depr) = -(fac_AMPAcomb_PYdr_PYso+fac_AMPA_cort_large_vary)*gAMPA/normalizingFactor.*((depr.*s)*netcon).*(X-EAMPA)
+
+% This way we record the synaptic currents!
+monitor read_IMiniAMPA_PYdr_PYso
+monitor IAMPAcomb_PYdr_PYso
+
+% Linker
 % ODEs and ICs
 % The "state" of the newRelease state variable is a random minimum AMOUNT of
 %     time until the next mini can happen for that synapse. (This is where the
@@ -108,5 +184,15 @@ newRelease(0) = neMiniIC+neMiniNoiseIC.*rand(1,N_pre)
 lastRelease' = checkTime(t,lastRelease,newRelease).*((t - lastRelease)./dt)
 lastRelease(0) = laMiniIC+laMiniNoiseIC.*rand(1,N_pre)
 
+
+% ODEs and ICs
+s' = alpha.*(1 + tanh(X_pre./4)).*(1-s) - beta.*s
+s(0) = sAMPAIC+sAMPANoiseIC.*rand(1,N_pre)
+
+% This represents the amount of synaptic resources available
+% depr' = ((t-tspike_pre)<=dt).*(((1 - (1 - depr.*(1-resUse)).*exp(-(t-tspike_pre)./tauRecov))-depr)./dt)
+depr' = (((t-tspike_pre)<=dt).*(((1 - (1 - depr.*(1-resUse)).*(abs(-(t-tspike_pre)/tauRecov)<10).*exp(-(t-tspike_pre)./tauRecov))-depr)./dt)) + (checkTime(t,lastRelease,newRelease).*(((1 - (1 - depr.*(1-resUseMini)).*(abs(-(t-tspike_pre)/tauRecov)<10).*exp(-(t-tspike_pre)./tauRecov))-depr)./dt))
+depr(0) = deprAMPAIC+deprAMPANoiseIC*rand(1,N_pre)
+
 % Linker
-@current += IMiniAMPA_PYdr_PYso(X,t,lastRelease,newRelease)
+@current += IAMPAcomb_PYdr_PYso(X_post,s,depr) + IMiniAMPA_PYdr_PYso(X,t,lastRelease,newRelease)
