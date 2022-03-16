@@ -1,7 +1,4 @@
 % # iAMPAcomb_INdr_PYso: Normalized synaptic AMPAergic excitatory current,
-
-% AES omfg
-
 %     with synaptic depression, FROM the pyramidal axo-soma TO interneuron
 %     dendrite INdr<-PYso connection used in the DynaSim implementation of
 %     (Krishnan et al., 2016). Note that in the original code, the class for

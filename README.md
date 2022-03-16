@@ -17,7 +17,11 @@ seems to be inherited in part from the code of (Bazhenov et al., 2002), which
 can be found [here at
 ModelDB](https://senselab.med.yale.edu/ModelDB/ShowModel.cshtml?model=28189).
 
-Note that this is only intended to reproduce the qualitative behavior of the
+NOTE: This must be run using a custom version of DynaSim (see below) and has
+only been tested for MATLAB 2017a. Let me know if you want to run it and I'll
+help!
+
+This is only intended to reproduce the qualitative behavior of the
 "base", not the "extended" model of the paper. That said, there are experimental
 adjustment factors in the code that would make modeling the extended model easy.
 Also note that this is NOT intended as a bit-perfect reproduction of the
@@ -28,7 +32,8 @@ overall qualitative results.
 
 The easiest way to get started with this is:
 
-1. Install DynaSim (https://github.com/DynaSim/DynaSim/wiki/Installation),
+1. Install this custom version of DynaSim
+   (https://github.com/asoplata/DynaSim/tree/coupling_addition),
    including adding it to your MATLAB path.
 2. `git clone` or download this code's repo
    (https://github.com/asoplata/dynasim-krishnan-2016-model) into
